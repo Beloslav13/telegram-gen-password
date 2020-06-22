@@ -259,3 +259,4 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/pycharm,python,windows
+/telegram_gen_password/_data.py
