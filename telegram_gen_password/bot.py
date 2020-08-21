@@ -28,6 +28,17 @@ class Form(StatesGroup):
     end = State()
 
 
+async def state_finish(message, state):
+    markup = types.ReplyKeyboardRemove()
+    await message.answer('Ок, давай.\nДля запуска снова наберите /start', reply_markup=markup)
+    await state.finish()
+
+
+async def answer_len_password(message):
+    markup = types.ReplyKeyboardRemove()
+    await message.answer('Какой длинны?', reply_markup=markup)
+
+
 @dp.message_handler(commands='start')
 async def cmd_start(message: types.Message):
     """
@@ -70,13 +81,10 @@ async def process_start(message: types.Message, state: FSMContext):
         data['start'] = message.text.lower()
 
     if data['start'] == 'сгенерировать пароль':
-        markup = types.ReplyKeyboardRemove()
-        await message.answer('Какой длинны?', reply_markup=markup)
+        await answer_len_password(message)
         await Form.next()
     elif data['start'] == 'не, спасибо':
-        markup = types.ReplyKeyboardRemove()
-        await message.answer('Ок, давай.\nДля запуска снова наберите /start', reply_markup=markup)
-        await state.finish()
+        await state_finish(message, state)
     else:
         await message.reply('Тут два варианта:\n'
                             'Левая кнопка - генерирую пароль.\n'
@@ -118,9 +126,7 @@ async def process_gender_invalid(message: types.Message, state: FSMContext):
     Обработка состояния end, пользователь не нажал предложенные кнопки, полный выход.
     """
 
-    markup = types.ReplyKeyboardRemove()
-    await message.answer('Ок, давай.\nДля запуска снова наберите /start', reply_markup=markup)
-    await state.finish()
+    await state_finish(message, state)
 
 
 @dp.message_handler(state=Form.end)
@@ -133,12 +139,9 @@ async def process_gender(message: types.Message, state: FSMContext):
         data['end'] = message.text
 
     if data['end'] == 'Подойдёт':
-        markup = types.ReplyKeyboardRemove()
-        await message.answer('Ок, давай.\nДля запуска снова наберите /start', reply_markup=markup)
-        await state.finish()
+        await state_finish(message, state)
     elif data['end'] == 'Ещё раз':
-        markup = types.ReplyKeyboardRemove()
-        await message.answer('Какой длинны?', reply_markup=markup)
+        await answer_len_password(message)
         await Form.len_password.set()
 
 
