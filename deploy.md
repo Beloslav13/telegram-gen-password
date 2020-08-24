@@ -44,3 +44,9 @@
 
 Перезагрузка<br>
 `systemctl daemon-reload`<br>
+`sudo systemctl restart tgbot`<br>
+
+Обновление<br>
+`git fetch && git checkout -f origin/master`<br>
+Или<br>
+`git pull` 
