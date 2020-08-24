@@ -1,1 +1,0 @@
-worker: python telegram_gen_password/bot.py $PORT
