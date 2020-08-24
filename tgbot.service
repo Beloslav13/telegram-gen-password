@@ -1,0 +1,15 @@
+[Unit]
+Description=Telegram Bot
+After=network.target
+
+[Service]
+User=beloslav
+Group=beloslav
+
+WorkingDirectory=/home/beloslav/telegram-gen-password/
+Environment="PYTHONPATH=/home/beloslav/telegram-gen-password/"
+ExecStart=/home/beloslav/telegram-gen-password/.venv/bin/python /home/beloslav/telegram-gen-password/telegram_gen_password/bot.py
+
+[Install]
+WantedBy=multi-user.target
+
