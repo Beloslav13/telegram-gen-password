@@ -88,7 +88,7 @@ async def process_start(message: types.Message, state: FSMContext):
     else:
         await message.reply('Тут два варианта:\n'
                             'Левая кнопка - генерирую пароль.\n'
-                            'Правая кнопка - выход.')
+                            'Правая кнопка - выход(/q).')
 
 
 @dp.message_handler(lambda message: not message.text.isdigit(), state=Form.len_password)
