@@ -13,7 +13,7 @@ from char_collection.collect_password import CollectPassword
 
 from telegram_gen_password._data import TOKEN
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO, filename='log.log')
 API_TOKEN = TOKEN
 bot = Bot(token=API_TOKEN)
 generator = CollectPassword()
