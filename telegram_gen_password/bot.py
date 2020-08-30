@@ -9,7 +9,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import ParseMode
 from aiogram.utils import executor
 
-from char_collection.collect_password import CollectPassword
+from char_collection.collect_password import CollectPassword, CollectPasswordNotSpecialSymbol
 
 from telegram_gen_password._data import TOKEN
 
@@ -17,6 +17,7 @@ logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:
 API_TOKEN = TOKEN
 bot = Bot(token=API_TOKEN)
 generator = CollectPassword()
+generator_not_special_symbols = CollectPasswordNotSpecialSymbol()
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
@@ -24,6 +25,7 @@ dp = Dispatcher(bot, storage=storage)
 # States
 class Form(StatesGroup):
     start = State()
+    special_symbols = State()
     len_password = State()
     end = State()
 
@@ -81,7 +83,9 @@ async def process_start(message: types.Message, state: FSMContext):
         data['start'] = message.text.lower()
 
     if data['start'] == 'сгенерировать пароль':
-        await answer_len_password(message)
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
+        markup.add('Включить', 'Выключить')
+        await message.answer('Включить или выключить специальные символы в пароле? (!@#$%^&*()_=+[]{};:\\"|,)', reply_markup=markup)
         await Form.next()
     elif data['start'] == 'не, спасибо':
         await state_finish(message, state)
@@ -89,6 +93,25 @@ async def process_start(message: types.Message, state: FSMContext):
         await message.reply('Тут два варианта:\n'
                             'Левая кнопка - генерирую пароль.\n'
                             'Правая кнопка - выход (/q).')
+
+
+@dp.message_handler(lambda message: message.text, state=Form.special_symbols)
+async def process_len_password(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['special_symbols'] = message.text.lower()
+
+    if data['special_symbols'] == 'включить':
+        async with state.proxy() as data:
+            data.update({'on': True})
+        await Form.next()
+        await answer_len_password(message)
+    elif data['special_symbols'] == 'выключить':
+        async with state.proxy() as data:
+            data.update({'on': False})
+        await Form.next()
+        await answer_len_password(message)
+    else:
+        await message.reply('Выбери что-то из двух.')
 
 
 @dp.message_handler(lambda message: not message.text.isdigit(), state=Form.len_password)
@@ -110,7 +133,10 @@ async def process_len_password(message: types.Message, state: FSMContext):
 
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
     markup.add('Ещё раз', 'Подойдёт')
-    result = generator(data['len_password'])
+    if data['on']:
+        result = generator(data['len_password'])
+    else:
+        result = generator_not_special_symbols(data['len_password'])
 
     if result is None:
         result = 'Пароль должен быть от 6 до 20 символов!'
