@@ -96,7 +96,7 @@ async def process_start(message: types.Message, state: FSMContext):
 
 
 @dp.message_handler(lambda message: message.text, state=Form.special_symbols)
-async def process_len_password(message: types.Message, state: FSMContext):
+async def process_special_symbols(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['special_symbols'] = message.text.lower()
 
